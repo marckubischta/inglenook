@@ -1,0 +1,103 @@
+<html>
+<head>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function() {
+  var tracks, currentTrack, trackLimits, moves, lastMoveType;
+  function randomize() {
+    tracks = [];
+    currentTrack = 1;
+    moves = 0;
+    lastMoveType = null;
+    tracks.push(['E']);
+    trackLimits = [4,5,3,3];
+    // generate 8 cars on 1st two sidings
+    var order = [1,2,3,4,5,6,7,8];
+    var currentIndex = 8, temporaryValue, randomIndex;
+    while (0 !== currentIndex) {
+      // choose a remaining element
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
+      // swap it with the current element
+      temporaryValue = order[currentIndex];
+      order[currentIndex] = order[randomIndex];
+      order[randomIndex] = temporaryValue;
+    }
+    tracks.push(order.slice(0,5));
+    tracks.push(order.slice(5,8));
+    // generate empty 3rd siding
+    tracks.push([]);
+    console.log(tracks);
+  };
+  function redraw() {
+    document.querySelector('#m1').innerHTML = "";
+    document.querySelector('#m2').innerHTML = "";
+    document.querySelector('#m3').innerHTML = "";
+    var currentTrackSelector = "#m" + currentTrack;
+    document.querySelector(currentTrackSelector).innerHTML = ("~~~~" + tracks[0].join('')).slice(-trackLimits[0]);
+    document.querySelector('#s1').innerHTML = (tracks[1].join('') + "~~~~~").slice(0,trackLimits[1]);
+    document.querySelector('#s2').innerHTML = (tracks[2].join('') + "~~~").slice(0,trackLimits[2]);
+    document.querySelector('#s3').innerHTML = (tracks[3].join('') + "~~~").slice(0,trackLimits[3]);
+    document.querySelector('#status').innerHTML = "Moves: " + moves;
+  };
+  randomize();
+  redraw();
+  function move(moveType) {
+    if (lastMoveType && lastMoveType != moveType) {
+      moves += 1;
+    }
+    lastMoveType = moveType;
+  };
+  document.onkeydown = function (e) {
+    e = e || window.event;
+    switch(e.keyCode) {
+      case 13: //enter
+        randomize();
+        redraw();
+        break;
+      case 37: //left arrow
+        if (tracks[0].length < trackLimits[0] && tracks[currentTrack].length > 0) {
+          tracks[0].push(tracks[currentTrack].shift());
+          move('shunt');
+        }
+        redraw();
+        break;
+      case 38: //up arrow
+        if (currentTrack > 1) {
+          currentTrack -= 1;
+          move('switch');
+        }
+        redraw();
+        break;
+      case 39: //right arrow
+        if (tracks[currentTrack].length < trackLimits[currentTrack] && tracks[0].length > 0) {
+          tracks[currentTrack].unshift(tracks[0].pop());
+          move('shunt');
+        }
+        redraw();
+        break;
+      case 40: //down arrow
+        if (currentTrack < 3) {
+          currentTrack += 1;
+          move('switch');
+        }
+        redraw();
+        break;
+      case 32:
+        console.log(switches);
+        console.log(moves);
+    }
+  }
+});
+</script>
+</head>
+<body>
+<input/>
+<table border=1>
+<tr><th>&lt;- mainline</th><th>yard</th></tr>  
+<tr><td align="right" id="m1"/><td id="s1"/></tr>  
+<tr><td align="right" id="m2"/><td id="s2"/></tr>  
+<tr><td align="right" id="m3"/><td id="s3"/></tr>
+</table>
+<span id="status"/>
+</body>
+</html>
